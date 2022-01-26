@@ -117,16 +117,19 @@ vec3 March(vec3 rayOri, vec3 rayDir){
 
         d = dist(p);
         p += d * rayDir;
-        if(d < .5){
+        if(d < .5)
+        {
             vec3 n = normal(p);
             vec3 l = normalize(vec3(1.5,2.,0.));
             float light = max(dot(n,l),0.);
             col +=  mix(objcol / 100, vec3(.01,.01,.01), light);
-             if(frequencyToSend > 10000){
+             if(frequencyToSend > 10000)
+                {
                 col *= 1.01;
                 }
         }
-		if (d<0.01){
+		if (d<0.01)
+        {
             vec3 n = normal(p);
             vec3 l = normalize(vec3(1.5,2.,0.));
             float light = max(dot(n,l),0.);
@@ -141,9 +144,9 @@ vec3 March(vec3 rayOri, vec3 rayDir){
 
 void main()
 {
-    vec2 uv = (vec2(gl_FragCoord.x, gl_FragCoord.y) / vec2(1920, 1920)) -.5;
+    vec2 uv = (vec2(gl_FragCoord.x, gl_FragCoord.y) / vec2(1920, 1920) -.5);
 
-	vec3 rayOri = vec3(25,13.,-60);
+	vec3 rayOri = vec3(25,13,-60);
 	vec3 rayDir = normalize(vec3(uv, 1.));
 
 	vec3 col = March(rayOri, rayDir);
