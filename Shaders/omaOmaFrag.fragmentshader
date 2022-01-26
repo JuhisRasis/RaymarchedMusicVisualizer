@@ -1,0 +1,131 @@
+#version 330 core
+
+ out vec4 fragColor;
+ in vec2 fragCoord;
+
+
+ uniform float time;
+ uniform float sinTime; 
+
+vec3 objcol;
+
+float hash12(vec2 p)
+{
+	vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+mat2 rot(float a){
+    float s = sin(a), c = cos(a);
+
+    return mat2(c, s, -s, c);
+}
+
+vec2 rotate(vec2 p,float a){
+	float c = cos(a);
+    float s = sin(a);
+    return p*mat2(c,s,-s,c);
+}
+
+float de(vec3 pos)
+{
+    float t = mod(time,15.);
+    float a=smoothstep(5.,30.,t);
+    float jokuFloat =sin(time*1.*.6);
+
+    float sinTest = sin(time * 5);
+
+
+
+   pos.xz *= rot(sin(t)+.5);
+   //pos.xz *= rot(time+.5);
+   pos.yz *= rot(time) * rot(-time * .5);
+
+
+   //pos.x += sin(t) * 10;
+
+    vec3 p = pos;
+    float s=1;
+
+    float fraction = length(p)/s-.1;
+    //pos.xy *= rot(time);
+    p = abs(pos) - 3. - a;
+    float d = length(p);
+
+
+
+
+    d = min(d, max(length(p.xz)-.05,p.y)- (abs(p.y) / 4));
+
+    d = min(d, length(p.xy-abs(sin(p.z*.5-time*10.)*2)));
+    d = min(d, length(p.yz-abs(sin(p.x*.5-time*10.)*.3)));
+
+    p = abs(pos);
+
+
+
+    d = min(d, length(p) - 1f); //length() — calculate the length of a vector
+
+    
+
+    //d = min(d, smoothstep(dot(p.xz, p.xy),.8, .5));
+
+    d = min(d, fraction);
+    //objcol = abs(pos) / 2;
+    if (d==fraction) 
+        objcol=vec3(0,1,1);
+
+    return d;
+}
+
+
+vec3 normal(vec3 p) {
+    vec2 d = vec2(0., .01);
+    return normalize(vec3(de(p+d.yxx), de(p+d.xyx), de(p+d.xxy))-de(p));
+}
+
+
+
+vec3 march(vec3 from, vec3 dir)
+{
+    float d = 0., td = 0., maxdist = 30.;
+    vec3 p = from, col = vec3(0.);
+    for (int i = 0; i<100; i++)
+    {
+        float d2 = de(p) * (1.-hash12(gl_FragCoord.xy+time)*.2);
+
+        if (d2<-0)
+        {
+            vec3 n = normal(p);
+            dir = reflect(dir, n); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/reflect.xhtml
+            d2 = .1;
+          
+        }
+        d = max(.01, abs(d2));
+        p += d * dir;
+        td += d;
+        if (td>maxdist) break;
+        col += .015 * objcol;
+    }
+    return pow(col, vec3(2.));
+}
+
+// vec2(gl_FragCoord.x / 1080, gl_FragCoord.y /1920) - .5;
+void main()
+{
+   
+
+    vec2 uv = (vec2(gl_FragCoord.x / 1080, gl_FragCoord.y /1920) - vec2(+0.8, +0.3)) * 3;
+    uv.x *= .5f;
+
+    vec3 from = vec3(0.,0.,-10.); // cameraPos
+    vec3 dir = normalize(vec3(uv, 1));
+    vec3 col = march(from, dir);
+
+    fragColor = vec4(col,1.);
+}
+// Vector multipiclations
+// The Vector Dot Product dot() == float
+// The Vector Dot Product cross() == vec
+// min() Returns the smallest of a and b. If both are equivalent, a is returned.

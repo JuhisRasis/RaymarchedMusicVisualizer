@@ -1,0 +1,18 @@
+#version 330 core
+
+in vec3 fragmentColor;
+in vec2 vertUV;
+
+out vec3 color;
+uniform sampler2D texA;
+uniform sampler2D texB;
+uniform sampler2D texM;
+
+void main()
+{
+	vec3 cA = texture(texA, vertUV).rgb;
+	vec3 cB = texture(texB, vertUV).rgb;
+	float m = texture(texM, vertUV).r;
+	vec3 c = mix(cA, cB, m);
+	color = c + fragmentColor;
+}
